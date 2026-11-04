@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YerbaMate JD | Venta Minorista de yerbas</title>
+    
+    <!-- Favicon (Loguito de la pestaña) -->
+    <!-- Opción 1: Emoji de mate (Activo por defecto) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧉</text></svg>">
+    
+    <!-- Opción 2: Tu propio logo (Descomentá la línea de abajo y borrá la de arriba si querés usar tu foto) -->
+    <!-- <link rel="icon" type="image/png" href="tu-logo.png"> -->
+    
+    <!-- Fuentes de Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconos Phosphor -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configuración personalizada de Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            bg: '#f7eedf',
+                            primary: '#26442c',
+                            primaryHover: '#1f3824',
+                            text: '#1a2e1d'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Estilos personalizados para el scrollbar y animaciones */
+        body {
+            background-color: #f7eedf;
+            color: #26442c;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f7eedf;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #26442c;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1f3824;
+        }
+
+        /* Animación para el panel del carrito */
+        .cart-open {
+            transform: translateX(0%);
+        }
+        .cart-closed {
+            transform: translateX(100%);
+        }
+
+        /* Animación para el toast (notificación) */
+        .toast-enter {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .toast-exit {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col font-sans">
+
+    <!-- Navegación -->
+    <nav class="bg-brand-bg sticky top-0 z-40 border-b border-brand-primary/20 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex-shrink-0 flex items-center gap-2">
+                    <i class="ph ph-plant text-3xl text-brand-primary"></i>
+                    <h1 class="text-2xl font-bold tracking-tight text-brand-primary">YerbaMate<span class="font-light">JD</span></h1>
+                </div>
+                <div class="flex items-center">
+                    <button id="cart-btn" class="relative p-2 text-brand-primary hover:bg-brand-primary/10 rounded-full transition-colors duration-200 focus:outline-none">
+                        <i class="ph ph-shopping-cart text-2xl"></i>
+                        <span id="cart-badge" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-brand-bg transform translate-x-1/4 -translate-y-1/4 bg-brand-primary rounded-full hidden">
+                            0
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Hero Section -->
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-brand-primary mb-4">Historias, charlas y buenos momentos: todo empieza con un buen mate.</h2>
+            <p class="text-lg text-brand-text/80 max-w-2xl mx-auto">Seleccioná tus productos, agregalos al carrito y completá tu compra directamente por WhatsApp de forma rápida y segura.</p>
+        </div>
+
+        <!-- Grid de Productos -->
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Los productos se insertarán aquí dinámicamente -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-brand-primary text-brand-bg py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0 flex items-center gap-2">
+                <i class="ph ph-plant text-2xl"></i>
+                <span class="text-xl font-bold">YerbaMateJD</span>
+            </div>
+            <p class="text-sm opacity-80">&copy; 2026 YerbaMateJD. Todos los derechos reservados.</p>
+            <div class="flex gap-4 mt-4 md:mt-0">
+                <a href="https://www.instagram.com/yerbamate.jd/" target="_blank" class="hover:text-white transition-colors"><i class="ph ph-instagram-logo text-2xl"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Overlay oscuro para el carrito -->
+    <div id="cart-overlay" class="fixed inset-0 bg-brand-primary/50 backdrop-blur-sm z-40 hidden transition-opacity duration-300 opacity-0"></div>
+
+    <!-- Panel Lateral del Carrito -->
+    <aside id="cart-sidebar" class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-brand-bg shadow-2xl cart-closed transition-transform duration-300 ease-in-out flex flex-col border-l border-brand-primary/20">
+        
+        <!-- Header del Carrito -->
+        <div class="flex items-center justify-between p-6 border-b border-brand-primary/20 bg-brand-bg">
+            <h2 class="text-2xl font-bold text-brand-primary flex items-center gap-2">
+                <i class="ph ph-shopping-bag text-2xl"></i> Tu Carrito
+            </h2>
+            <button id="close-cart-btn" class="p-2 text-brand-primary hover:bg-brand-primary/10 rounded-full transition-colors duration-200">
+                <i class="ph ph-x text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Items del Carrito -->
+        <div id="cart-items-container" class="flex-grow p-6 overflow-y-auto flex flex-col gap-4">
+            <!-- Estado vacío por defecto -->
+            <div id="empty-cart-msg" class="flex flex-col items-center justify-center h-full text-brand-text/60">
+                <i class="ph ph-shopping-cart-simple text-6xl mb-4 opacity-50"></i>
+                <p class="text-lg text-center">Tu carrito está vacío.</p>
+                <p class="text-sm text-center mt-2">¡Agregá algunos productos para empezar!</p>
+            </div>
+            <!-- Los items se renderizan aquí -->
+            <div id="cart-items" class="hidden flex-col gap-4"></div>
+        </div>
+
+        <!-- Footer del Carrito (Total y Botón de compra) -->
+        <div class="p-6 border-t border-brand-primary/20 bg-brand-bg/95 backdrop-blur">
+            <div class="flex justify-between items-center mb-6">
+                <span class="text-lg font-semibold text-brand-text">Total:</span>
+                <span id="cart-total" class="text-2xl font-bold text-brand-primary">$0</span>
+            </div>
+            <button id="checkout-btn" class="w-full bg-brand-primary text-brand-bg py-4 px-6 rounded-xl font-bold text-lg hover:bg-brand-primaryHover transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="ph-fill ph-whatsapp-logo text-2xl"></i>
+                Comprar por WhatsApp
+            </button>
+            <p class="text-xs text-center text-brand-text/70 mt-4">Al hacer clic, se abrirá WhatsApp con el detalle de tu pedido listo para enviar.</p>
+        </div>
+    </aside>
+
+    <!-- Contenedor de Toast Notifications -->
+    <div id="toast-container" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Scripts - Lógica de la aplicación -->
+    <script>
+        // --- 1. CONFIGURACIÓN ---
+        
+        // Número de WhatsApp al que se enviará el pedido
+        const WHATSAPP_NUMBER = '5492657502472'; 
+
+        // Formateador de moneda (Pesos Argentinos)
+        const currencyFormatter = new Intl.NumberFormat('es-AR', {
+            style: 'currency',
+            currency: 'ARS',
+            minimumFractionDigits: 0
+        });
+
+        // --- 2. BASE DE DATOS DE PRODUCTOS ---
+        const products = [
+            { id: 1, name: 'Baldo 1Kg', price: 13000, image: '1.jpeg' },
+            { id: 2, name: 'Baldo 500g', price: 7500, image: '2.jpeg' },
+            { id: 3, name: 'Rei Verde Padrón Argentino 1Kg', price: 9300, image: '3.jpeg' },
+            { id: 4, name: 'Rei Verde Premium 1Kg', price: 13500, image: '4.jpeg' },
+            { id: 5, name: 'Rei Verde Premium 500g', price: 7500, image: '5.jpeg' },
+            { id: 6, name: 'Sara Extra Suave 1Kg', price: 15000, image: '6.jpeg' },
+            { id: 7, name: 'Sara de coco 500g', price: 9500, image: '7.jpeg' },
+            { id: 8, name: 'Barao 500g', price: 6000, image: '8.jpeg' },
+            { id: 9, name: 'Verdecita 1Kg', price: 9500, image: '9.jpeg' },
+            { id: 10, name: 'Canarias Suave 500g', price: 8200, image: '10.jpeg' },
+            { id: 11, name: 'Canarias té verde y jengibre 500g', price: 8500, image: '11.jpeg' },
+            { id: 12, name: 'Cósmico 500g', price: 5000, image: '12.jpeg' }
+        ];
+
+        // --- 3. ESTADO DE LA APLICACIÓN ---
+        let cart = [];
+
+        // --- 4. ELEMENTOS DEL DOM ---
+        const productGrid = document.getElementById('product-grid');
+        const cartBtn = document.getElementById('cart-btn');
+        const cartBadge = document.getElementById('cart-badge');
+        const cartSidebar = document.getElementById('cart-sidebar');
+        const closeCartBtn = document.getElementById('close-cart-btn');
+        const cartOverlay = document.getElementById('cart-overlay');
+        const cartItemsContainer = document.getElementById('cart-items');
+        const emptyCartMsg = document.getElementById('empty-cart-msg');
+        const cartTotalEl = document.getElementById('cart-total');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        const toastContainer = document.getElementById('toast-container');
+
+        // --- 5. FUNCIONES PRINCIPALES ---
+        function renderProducts() {
+            productGrid.innerHTML = '';
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-2xl shadow-sm border border-brand-primary/10 overflow-hidden hover:shadow-md transition-shadow duration-300 flex flex-col group';
+                
+                card.innerHTML = `
+                    <div class="relative overflow-hidden aspect-square bg-gray-100">
+                        <img src="${product.image}" alt="${product.name}" onerror="this.onerror=null; this.src='https://placehold.co/400x400/26442c/f7eedf?text=Yerba+Mate&font=Inter';" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500">
+                    </div>
+                    <div class="p-5 flex flex-col flex-grow">
+                        <h3 class="text-xl font-bold text-brand-primary mb-1">${product.name}</h3>
+                        <div class="flex items-center justify-between mt-auto pt-4 border-t border-brand-primary/10">
+                            <span class="text-xl font-bold text-brand-primary">${currencyFormatter.format(product.price)}</span>
+                            <button onclick="addToCart(${product.id})" class="bg-brand-primary text-brand-bg w-10 h-10 rounded-full flex items-center justify-center hover:bg-brand-primaryHover hover:scale-110 transition-all duration-200 shadow-md">
+                                <i class="ph ph-plus font-bold"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                productGrid.appendChild(card);
+            });
+        }
+
+        window.addToCart = function(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const existingItem = cart.find(item => item.id === productId);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+
+            updateCart();
+            showToast(`${product.name} agregado al carrito`);
+        };
+
+        window.updateQuantity = function(productId, change) {
+            const itemIndex = cart.findIndex(item => item.id === productId);
+            if (itemIndex > -1) {
+                cart[itemIndex].quantity += change;
+                if (cart[itemIndex].quantity <= 0) cart.splice(itemIndex, 1);
+                updateCart();
+            }
+        }
+
+        window.removeFromCart = function(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            updateCart();
+        }
+
+        function updateCart() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            if (totalItems > 0) {
+                cartBadge.textContent = totalItems;
+                cartBadge.classList.remove('hidden');
+            } else {
+                cartBadge.classList.add('hidden');
+            }
+
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            cartTotalEl.textContent = currencyFormatter.format(totalPrice);
+            checkoutBtn.disabled = cart.length === 0;
+
+            if (cart.length === 0) {
+                emptyCartMsg.classList.remove('hidden');
+                cartItemsContainer.classList.add('hidden');
+                cartItemsContainer.classList.remove('flex');
+            } else {
+                emptyCartMsg.classList.add('hidden');
+                cartItemsContainer.classList.remove('hidden');
+                cartItemsContainer.classList.add('flex');
+                
+                cartItemsContainer.innerHTML = '';
+                cart.forEach(item => {
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'flex gap-4 p-3 bg-white rounded-xl border border-brand-primary/10 shadow-sm items-center';
+                    itemEl.innerHTML = `
+                        <img src="${item.image}" alt="${item.name}" onerror="this.onerror=null; this.src='https://placehold.co/400x400/26442c/f7eedf?text=Yerba+Mate&font=Inter';" class="w-16 h-16 object-cover rounded-lg bg-gray-100">
+                        <div class="flex-grow">
+                            <h4 class="font-semibold text-brand-primary text-sm">${item.name}</h4>
+                            <div class="text-brand-primary font-bold text-sm mb-1">${currencyFormatter.format(item.price)}</div>
+                            <div class="flex items-center gap-3">
+                                <div class="flex items-center bg-brand-bg rounded-lg border border-brand-primary/20">
+                                    <button onclick="updateQuantity(${item.id}, -1)" class="w-7 h-7 flex items-center justify-center text-brand-primary hover:bg-brand-primary/10 rounded-l-lg transition-colors"><i class="ph ph-minus text-xs"></i></button>
+                                    <span class="w-6 text-center text-sm font-semibold text-brand-primary">${item.quantity}</span>
+                                    <button onclick="updateQuantity(${item.id}, 1)" class="w-7 h-7 flex items-center justify-center text-brand-primary hover:bg-brand-primary/10 rounded-r-lg transition-colors"><i class="ph ph-plus text-xs"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="removeFromCart(${item.id})" class="text-red-800/50 hover:text-red-800 hover:bg-red-50 p-2 rounded-full transition-colors" title="Eliminar">
+                            <i class="ph ph-trash text-lg"></i>
+                        </button>
+                    `;
+                    cartItemsContainer.appendChild(itemEl);
+                });
+            }
+        }
+
+        function toggleCart() {
+            const isClosed = cartSidebar.classList.contains('cart-closed');
+            if (isClosed) {
+                cartSidebar.classList.remove('cart-closed');
+                cartSidebar.classList.add('cart-open');
+                cartOverlay.classList.remove('hidden');
+                setTimeout(() => {
+                    cartOverlay.classList.remove('opacity-0');
+                    cartOverlay.classList.add('opacity-100');
+                }, 10);
+                document.body.style.overflow = 'hidden';
+            } else {
+                cartSidebar.classList.remove('cart-open');
+                cartSidebar.classList.add('cart-closed');
+                cartOverlay.classList.remove('opacity-100');
+                cartOverlay.classList.add('opacity-0');
+                setTimeout(() => { cartOverlay.classList.add('hidden'); }, 300);
+                document.body.style.overflow = '';
+            }
+        }
+
+        function processCheckout() {
+            if (cart.length === 0) return;
+            let message = `*¡Hola! Quiero realizar un pedido de YerbaMateJD:*\n\n`;
+            cart.forEach(item => {
+                message += `▪ ${item.quantity}x ${item.name} (${currencyFormatter.format(item.price)} c/u) = ${currencyFormatter.format(item.quantity * item.price)}\n`;
+            });
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            message += `\n*TOTAL: ${currencyFormatter.format(totalPrice)}*\n\n`;
+            message += `_Espero confirmación, ¡muchas gracias!_`;
+            
+            const encodedMessage = encodeURIComponent(message);
+            window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`, '_blank');
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'bg-brand-primary text-brand-bg px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 toast-exit transition-all duration-300 pointer-events-auto';
+            toast.innerHTML = `<i class="ph-fill ph-check-circle text-lg text-[#f7eedf]"></i><span class="font-medium text-sm">${message}</span>`;
+            toastContainer.appendChild(toast);
+            setTimeout(() => { toast.classList.remove('toast-exit'); toast.classList.add('toast-enter'); }, 10);
+            setTimeout(() => {
+                toast.classList.remove('toast-enter'); toast.classList.add('toast-exit');
+                setTimeout(() => { toast.remove(); }, 300);
+            }, 3000);
+        }
+
+        cartBtn.addEventListener('click', toggleCart);
+        closeCartBtn.addEventListener('click', toggleCart);
+        cartOverlay.addEventListener('click', toggleCart);
+        checkoutBtn.addEventListener('click', processCheckout);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderProducts();
+            updateCart();
+        });
+    </script>
+</body>
+</html>
