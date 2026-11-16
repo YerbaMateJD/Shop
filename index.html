@@ -151,6 +151,7 @@
 
         // --- BASE DE DATOS DE PRODUCTOS ---
         // Para quitar el stock de un producto, simplemente cambiá inStock: true por inStock: false
+        // Los productos con inStock: false se moverán automáticamente al final de la página
         const products = [
             { id: 1, name: 'Baldo 1Kg', price: 13000, image: '1.jpeg', inStock: true },
             { id: 2, name: 'Baldo 500g', price: 7500, image: '2.jpeg', inStock: true },
@@ -164,7 +165,7 @@
             { id: 10, name: 'Barao 500g', price: 6000, image: '8.jpeg', inStock: false },
             { id: 11, name: 'Verdecita 1Kg', price: 9500, image: '9.jpeg', inStock: true },
             { id: 12, name: 'Canarias Suave 500g', price: 8200, image: '10.jpeg', inStock: true },
-            { id: 13, name: 'Canarias té verde y jengibre 500g', price: 8500, image: '11.jpeg', inStock: false },
+            { id: 13, name: 'Canarias té verde y jengibre 500g', price: 8500, image: '11.jpeg', inStock: true },
             { id: 14, name: 'Cósmico 500g', price: 5000, image: '12.jpeg', inStock: true }
         ];
 
@@ -184,7 +185,11 @@
 
         function renderProducts() {
             productGrid.innerHTML = '';
-            products.forEach(product => {
+
+            // Ordenamos una copia de la lista para que los que tienen stock (true) vayan primero y los sin stock (false) al final
+            const sortedProducts = [...products].sort((a, b) => Number(b.inStock) - Number(a.inStock));
+
+            sortedProducts.forEach(product => {
                 const card = document.createElement('div');
                 card.className = `bg-white rounded-2xl shadow-sm border border-brand-primary/10 overflow-hidden hover:shadow-md transition-shadow duration-300 flex flex-col group ${!product.inStock ? 'opacity-80' : ''}`;
                 
